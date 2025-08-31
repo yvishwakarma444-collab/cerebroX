@@ -1,0 +1,39 @@
+import React, { useState } from "react";
+
+export default function CounterPreviewer() {
+  const [text, setText] = useState("");
+
+  const handleChange = (e) => {
+    setText(e.target.value);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
+      <div className="w-full max-w-2xl bg-white shadow-lg rounded-2xl p-6">
+        <h1 className="text-2xl font-bold mb-4 text-center">📝 Counter + Live Previewer</h1>
+
+        {/* Textarea Input */}
+        <textarea
+          value={text}
+          onChange={handleChange}
+          placeholder="Type something here..."
+          className="w-full h-40 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+
+        {/* Stats */}
+        <div className="flex justify-between text-gray-600 mt-3">
+          <p>Characters: <span className="font-semibold">{text.length}</span></p>
+          <p>Words: <span className="font-semibold">{text.trim() ? text.trim().split(/\s+/).length : 0}</span></p>
+        </div>
+
+        {/* Live Preview */}
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-2">👀 Live Preview:</h2>
+          <div className="p-3 border rounded-lg bg-gray-50 min-h-[80px]">
+            {text ? text : <span className="text-gray-400">Start typing to see preview...</span>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
