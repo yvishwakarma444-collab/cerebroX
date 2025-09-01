@@ -1,0 +1,79 @@
+import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
+
+// Local-state only To‑Do List — single-file React component
+// No persistence, no external data fetching.
+// Features: add, edit inline, complete toggle, delete, reorder, filters, clear completed, counters.
+
+function uid() {
+  return Math.random().toString(36).slice(2, 9);
+}
+
+const initialTodos = [
+  { id: uid(), text: "Try the demo ✨", done: false },
+  { id: uid(), text: "Mark items complete ✔️", done: false },
+  { id: uid(), text: "Edit text by clicking ✏️", done: false },
+];
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "add": {
+      const text = action.text?.trim();
+      if (!text) return state;
+      return [{ id: uid(), text, done: false }, ...state];
+    }
+    case "toggle":
+      return state.map(t => (t.id === action.id ? { ...t, done: !t.done } : t));
+    case "edit":
+      return state.map(t => (t.id === action.id ? { ...t, text: action.text } : t));
+    case "remove":
+      return state.filter(t => t.id !== action.id);
+    case "clearCompleted":
+      return state.filter(t => !t.done);
+    case "reorder": {
+      const { id, dir } = action; // dir: -1 up, +1 down
+      const idx = state.findIndex(t => t.id === id);
+      if (idx < 0) return state;
+      const j = idx + dir;
+      if (j < 0 || j >= state.length) return state;
+      const copy = state.slice();
+      const [moved] = copy.splice(idx, 1);
+      copy.splice(j, 0, moved);
+      return copy;
+    }
+    default:
+      return state;
+  }
+}
+
+export default function TodoApp() {
+  const [todos, dispatch] = useReducer(reducer, initialTodos);
+  const [filter, setFilter] = useState("all"); // all | active | completed
+  const [text, setText] = useState("");
+  const inputRef = useRef(null);
+
+  const filtered = useMemo(() => {
+    if (filter === "active") return todos.filter(t => !t.done);
+    if (filter === "completed") return todos.filter(t => t.done);
+    return todos;
+  }, [todos, filter]);
+
+  const remaining = todos.filter(t => !t.done).length;
+
+  function addTodo() {
+    dispatch({ type: "add", text });
+    setText("");
+    inputRef.current?.focus();
+  }
+
+  return (
+    <div className="min-h-screen w-full bg-slate-50 flex items-start justify-center py-10 px-4">
+      <div className="w-full max-w-xl">
+        <header className="mb-6 flex items-center justify-between">
+          <h1 className="text-3xl font-bold tracking-tight">To‑Do List</h1>
+          <span className="text-sm text-slate-500">Local state only</span>
+        </header>
+
+        <div className="rounded-2xl bg-white shadow-sm border border-slate-200 p-4">
+          <div className="flex gap-2">
+            <input
+              ref={inputRef
